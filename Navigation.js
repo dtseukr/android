@@ -1,23 +1,31 @@
+// Navigation.js
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from './HomeScreen';
-import MoviesScreen from './MoviesScreen';
-import SeriesScreen from './SeriesScreen';
-import CartoonsScreen from './CartoonsScreen';
-import OtherScreen from './OtherScreen';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import HomeScreen from './pages/HomeScreen';
+import MoviesScreen from './pages/MoviesScreen';
+import SeriesScreen from './pages/SeriesScreen';
+import GamesScreen from './pages/GamesScreen';
+import DrawerMenu from './components/DrawerMenu';
 
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
+
+function AppDrawer() {
+    return (
+        <Drawer.Navigator initialRouteName="Home">
+            <Drawer.Screen name="Home" component={HomeScreen} />
+            <Drawer.Screen name="Movies" component={MoviesScreen} />
+            <Drawer.Screen name="Series" component={SeriesScreen} />
+            <Drawer.Screen name="Games" component={GamesScreen} />
+        </Drawer.Navigator>
+    );
+}
 
 export default function Navigation() {
     return (
         <NavigationContainer>
-            <Stack.Navigator>
-                <Stack.Screen name="Home" component={HomeScreen} />
-                <Stack.Screen name="Movies" component={MoviesScreen} />
-                <Stack.Screen name="Series" component={SeriesScreen} />
-                <Stack.Screen name="Cartoons" component={CartoonsScreen} />
-                <Stack.Screen name="Other" component={OtherScreen} />
-            </Stack.Navigator>
+            <AppDrawer />
         </NavigationContainer>
     );
 }
