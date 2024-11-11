@@ -1,41 +1,54 @@
-// HomeScreen.js
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TextInput } from 'react-native';
 import NewsCard from '../components/NewsCard';
+import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo, useEffect } from 'react';
 
-const newsData = [
-    {
-        id: '1',
-        title: 'Dragon Age: The Veilguard',
-        image: require('../assets/DragonAge.png'),
-        category: 'Games',
-        rating: '84',
-    },
-    {
-        id: '2',
-        title: 'Anora',
-        image: require('../assets/Anora.png'),
-        category: 'Movies',
-        rating: '91',
-    },
-    {
-        id: '3',
-        title: 'Like Water for Chocolate',
-        image: require('../assets/LikeWaterforChocolate.png'),
-        category: 'Series',
-        rating: '78',
-    },
-];
+const API_URL = 'https://my-json-server.typicode.com/dtseukr/file/news';
+
+const fetchNews = async () => {
+    const response = await fetch(API_URL);
+    if (!response.ok) {
+        throw new Error('Failed to fetch news');
+    }
+    return response.json();
+};
 
 export default function HomeScreen({ navigation }) {
+    const { data, error, isLoading } = useQuery({
+        queryKey: ['news'],
+        queryFn: fetchNews,
+    });
+
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredNews = useMemo(() => {
+        if (!data) return [];
+        return data.filter(item => item.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    }, [data, searchQuery]);
+
+    useEffect(() => {
+        // Можна використовувати для логіки, яка виконується при зміні searchQuery
+        console.log('Search query changed:', searchQuery);
+    }, [searchQuery]);
+
+    if (isLoading) return <Text>Loading...</Text>;
+    if (error) return <Text>Error: {error.message}</Text>;
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>New and Notable</Text>
+            <TextInput
+                style={styles.searchInput}
+                placeholder="Search news..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+            />
             <FlatList
-                data={newsData}
+                data={filteredNews}
                 renderItem={({ item }) => (
                     <NewsCard
-                        image={item.image}
+                        image={{ uri: item.image }}
                         title={item.title}
                         category={item.category}
                         rating={item.rating}
@@ -65,6 +78,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: 'black',
         marginBottom: 20,
+    },
+    searchInput: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 20,
+        width: '90%',
     },
     newsList: {
         alignItems: 'center',

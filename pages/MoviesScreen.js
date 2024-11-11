@@ -1,44 +1,56 @@
-// pages/MoviesScreen.js
-import React from 'react';
-import { View, FlatList, StyleSheet, Text } from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { View, FlatList, StyleSheet, Text, TextInput } from 'react-native';
 import ContentCard from '../components/ContentCard';
+import { useQuery } from '@tanstack/react-query';
 
-const moviesData = [
-    {
-        id: '1',
-        title: '1. Dekalog (1988)',
-        image: require('../assets/Dekalog.png'),
-        releaseDate: 'MAR 22, 1996',
-        rating: '100',
-        description: 'A ten-part series exploring moral dilemmas faced by residents of a Warsaw apartment complex, each episode inspired by a different Ten Commandment.',
-    },
-    {
-        id: '2',
-        title: '2. Citizen Kane',
-        image: require('../assets/CitizenKane.png'),
-        releaseDate: 'SEP 4, 1941',
-        rating: '100',
-        description: 'A groundbreaking film that follows the life of newspaper magnate Charles Foster Kane, delving into themes of power, loss, and the complexity of human experience.',
-    },
-    {
-        id: '3',
-        title: '3. The Leopard',
-        image: require('../assets/TheLeopard.png'),
-        releaseDate: 'AUG 13, 2004',
-        rating: '100',
-        description: 'A historical drama set in 19th-century Sicily, chronicling the decline of the aristocracy during Italy’s unification through the eyes of a noble family.',
-    },
-];
+const API_URL = 'https://my-json-server.typicode.com/dtseukr/file/movies';
+
+const fetchMovies = async () => {
+    const response = await fetch(API_URL);
+    if (!response.ok) {
+        throw new Error('Failed to fetch movies');
+    }
+    return response.json();
+};
 
 export default function MoviesScreen({ navigation }) {
+    const { data, error, isLoading } = useQuery({
+        queryKey: ['movies'],
+        queryFn: fetchMovies,
+    });
+
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredMovies = useMemo(() => {
+        if (!data) return [];
+        return data.filter(movie => movie.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    }, [data, searchQuery]);
+
+    useEffect(() => {
+        console.log('Search query changed:', searchQuery);
+    }, [searchQuery]);
+
+    const handleSearchChange = useCallback((text) => {
+        setSearchQuery(text);
+    }, []);
+
+    if (isLoading) return <Text>Loading...</Text>;
+    if (error) return <Text>Error: {error.message}</Text>;
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>The best movies for rating</Text>
+            <TextInput
+                style={styles.searchInput}
+                placeholder="Search movies..."
+                value={searchQuery}
+                onChangeText={handleSearchChange}
+            />
             <FlatList
-                data={moviesData}
+                data={filteredMovies}
                 renderItem={({ item }) => (
                     <ContentCard
-                        image={item.image}
+                        image={{ uri: item.image }}
                         title={item.title}
                         releaseDate={item.releaseDate}
                         rating={item.rating}
@@ -63,5 +75,12 @@ const styles = StyleSheet.create({
         color: 'black',
         marginBottom: 20,
         textAlign: 'center',
+    },
+    searchInput: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 20,
     },
 });

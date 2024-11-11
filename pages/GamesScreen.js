@@ -1,44 +1,56 @@
-// pages/GamesScreen.js
-import React from 'react';
-import { View, FlatList, StyleSheet, Text } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, FlatList, StyleSheet, Text, TextInput } from 'react-native';
 import ContentCard from '../components/ContentCard';
+import { useQuery } from '@tanstack/react-query';
 
-const gamesData = [
-    {
-        id: '1',
-        title: '1. The Legend of Zelda: Ocarina of Time',
-        image: require('../assets/TheLegendOfZelda.png'),
-        releaseDate: 'NOV 23, 1998',
-        rating: '99',
-        description: 'An iconic action-adventure game where Link must save Hyrule from the evil Ganondorf by solving puzzles and battling foes.',
-    },
-    {
-        id: '2',
-        title: '2. SoulCalibur',
-        image: require('../assets/SoulCalibur.png'),
-        releaseDate: 'MAY 19, 2015',
-        rating: '98',
-        description: 'A renowned weapon-based fighting game featuring diverse characters and fast-paced battles for the legendary Soul Blade.',
-    },
-    {
-        id: '3',
-        title: '3. Grand Theft Auto IV',
-        image: require('../assets/GrandTheftAuto.png'),
-        releaseDate: 'APR 29, 2008',
-        rating: '98',
-        description: 'An open-world action-adventure game following Niko Bellic as he navigates crime and ambition in Liberty City.',
-    },
-];
+const API_URL = 'https://my-json-server.typicode.com/dtseukr/file/games';
+
+const fetchGames = async () => {
+    const response = await fetch(API_URL);
+    if (!response.ok) {
+        throw new Error('Failed to fetch games');
+    }
+    return response.json();
+};
 
 export default function GamesScreen({ navigation }) {
+    const { data, error, isLoading } = useQuery({
+        queryKey: ['games'],
+        queryFn: fetchGames,
+    });
+
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredGames = useMemo(() => {
+        if (!data) return [];
+        return data.filter(game => game.title.toLowerCase().includes(searchQuery.toLowerCase()));
+    }, [data, searchQuery]);
+
+    useEffect(() => {
+        console.log('Search query changed:', searchQuery);
+    }, [searchQuery]);
+
+    const handleSearchChange = (text) => {
+        setSearchQuery(text);
+    };
+
+    if (isLoading) return <Text>Loading...</Text>;
+    if (error) return <Text>Error: {error.message}</Text>;
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>The best games for rating</Text>
+            <TextInput
+                style={styles.searchInput}
+                placeholder="Search games..."
+                value={searchQuery}
+                onChangeText={handleSearchChange}
+            />
             <FlatList
-                data={gamesData}
+                data={filteredGames}
                 renderItem={({ item }) => (
                     <ContentCard
-                        image={item.image}
+                        image={{ uri: item.image }}
                         title={item.title}
                         releaseDate={item.releaseDate}
                         rating={item.rating}
@@ -63,5 +75,12 @@ const styles = StyleSheet.create({
         color: 'black',
         marginBottom: 20,
         textAlign: 'center',
+    },
+    searchInput: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 20,
     },
 });
