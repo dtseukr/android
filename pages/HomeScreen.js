@@ -28,7 +28,6 @@ export default function HomeScreen({ navigation }) {
     }, [data, searchQuery]);
 
     useEffect(() => {
-        // Можна використовувати для логіки, яка виконується при зміні searchQuery
         console.log('Search query changed:', searchQuery);
     }, [searchQuery]);
 

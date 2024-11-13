@@ -1,4 +1,3 @@
-// components/DrawerMenu.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -13,6 +12,15 @@ export default function DrawerMenu({ navigation }) {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('Series')} style={styles.button}>
                 <Text style={styles.buttonText}>Go to Series</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.button}>
+                <Text style={styles.buttonText}>Go to Login</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Sign Up')} style={styles.button}>
+                <Text style={styles.buttonText}>Go to Sign Up</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.button}>
+                <Text style={styles.buttonText}>Go to Profile</Text>
             </TouchableOpacity>
         </View>
     );
