@@ -9,18 +9,26 @@ const queryClient = new QueryClient();
 const initializeDatabase = async (db) => {
   try {
     await db.execAsync(`
-            PRAGMA journal_mode = WAL;
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE,
-                password TEXT
-            );
-        `);
+          CREATE TABLE IF NOT EXISTS users (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              username TEXT UNIQUE,
+              password TEXT,
+              profileImage TEXT
+          );
+      `);
+
+    await db.execAsync(`
+          ALTER TABLE users ADD COLUMN profileImage TEXT;
+      `).catch((error) => {
+      if (!error.message.includes('duplicate column')) throw error;
+    });
+
     console.log('Database initialized!');
   } catch (error) {
     console.log('Error while initializing database!', error);
   }
 };
+
 
 export default function App() {
   return (

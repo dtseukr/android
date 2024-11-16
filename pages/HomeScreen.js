@@ -65,6 +65,8 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+
+
     container: {
         flex: 1,
         backgroundColor: '#fff',
@@ -95,3 +97,7 @@ const styles = StyleSheet.create({
         marginVertical: 0,
     },
 });
+
+
+
+
